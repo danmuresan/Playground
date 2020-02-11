@@ -81,13 +81,19 @@ object TreeProblems {
             val pathToNode2 = findPathToNode(node2)
 
             var lca = "Not Found"
-            val diff = Math.max(pathToNode1.size, pathToNode2.size) - Math.min(pathToNode1.size, pathToNode2.size)
+            val diff = pathToNode1.size - pathToNode2.size
             var idx = 0
             while (idx < Math.max(pathToNode1.size, pathToNode2.size)) {
-                if (pathToNode1[idx + diff] == pathToNode2[idx]) {
-                    return pathToNode2[idx].value
+                if (diff > 0) {
+                    if (pathToNode1[idx + diff] == pathToNode2[idx]) {
+                        return pathToNode2[idx].value
+                    }
+                } else {
+                    if (pathToNode2[idx + diff] == pathToNode1[idx]) {
+                        return pathToNode2[idx].value
+                    }
                 }
-
+                
                 idx++
             }
 
@@ -95,7 +101,98 @@ object TreeProblems {
         }
 
         fun findMinPathBetweenNodes(node1: String, node2: String): List<BinaryTreeNode> {
-            return listOf() // TODO: ....
+            val pathToNode1 = findPathToNode(node1)
+            val pathToNode2 = findPathToNode(node2)
+
+            //gfea
+            // dba
+            val diff = pathToNode1.size - pathToNode2.size
+            var idx = 0
+            val finalPath = mutableListOf<BinaryTreeNode>()
+
+            while (idx < Math.max(pathToNode1.size, pathToNode2.size)) {
+                if (diff > 0) {
+                    if (pathToNode1[idx + diff] == pathToNode2[idx]) {
+                        break
+                    }
+                } else {
+                    if (pathToNode2[idx + diff] == pathToNode1[idx]) {
+                        break
+                    }
+                }
+                
+                idx++
+            }
+
+            for (i in 0..idx+diff) {
+                if (diff > 0)
+                    finalPath.add(pathToNode1[i])
+                else
+                    finalPath.add(pathToNode2[i])
+            }
+
+            for (i in idx-1 downTo 0) {
+                print("GOT HEREs")
+                if (diff > 0)
+                    finalPath.add(pathToNode2[i])
+                else
+                    finalPath.add(pathToNode1[i])
+            }
+
+            return finalPath
+        }
+
+        // find every path from root to leaf
+        fun rootToLeafForAllPaths():  HashSet<List<BinaryTreeNode>> {
+            fun rootToLeafsRec(currentNode: BinaryTreeNode?, setOfPaths: HashSet<List<BinaryTreeNode>>, currentPath: MutableList<BinaryTreeNode>) {
+                // base case - end of tree (stop)
+                if (currentNode == null) {
+                    return
+                }
+
+                // add current node to current path
+                currentPath.add(currentNode)
+
+                // base case - leaf node, mark root as completed and remove leaf so we search remaining subtrees
+                if (currentNode.leftSubtree == null && currentNode.rightSubtree == null) {
+                    setOfPaths.add(currentPath.toList())
+                    if (currentPath.size > 0) {
+                        currentPath.removeAt(currentPath.lastIndex)
+                    }
+
+                    return 
+                }
+
+                // search subtrees recursively
+                rootToLeafsRec(currentNode.leftSubtree, setOfPaths, currentPath)
+                rootToLeafsRec(currentNode.rightSubtree, setOfPaths, currentPath)
+
+                // we searched both branches already so we must have found the leaf, remove last node
+                if (currentPath.size > 0) {
+                    currentPath.removeAt(currentPath.lastIndex)
+                }
+            }
+
+            val setOfPaths: HashSet<List<BinaryTreeNode>> = hashSetOf()
+            rootToLeafsRec(root, setOfPaths, mutableListOf())
+            return setOfPaths
+        }
+
+        // deepest leaf
+        fun findMaxDepthOfTree(): Int {
+            fun maxDepthRec(currentNode: BinaryTreeNode?): Int {
+                if (currentNode == null) {
+                    return 0
+                }
+
+                return Math.max(1 + maxDepthRec(currentNode.leftSubtree), 1 + maxDepthRec(currentNode.rightSubtree))
+            }
+
+            return maxDepthRec(root)
+        }
+
+        fun maxPathSumBetweenTwoLeaves(node1: String, node2: String): Int {
+            return -1   // TODO: ...
         }
 
         fun getHeight(): Int {
@@ -173,11 +270,17 @@ object TreeProblems {
             BinaryTreeNode("b", BinaryTreeNode("c"), BinaryTreeNode("d")),
             BinaryTreeNode("e", null, BinaryTreeNode("f", BinaryTreeNode("g"), BinaryTreeNode("h")))))
         print("Height of the sample tree: " + sampleTree.getHeight() + "\n")
-
         sampleTree.prettyPrint()
+
+        print("Input tree BST sample\n")
+        print("    e\n")
+        print("   c  f\n")
+        print("  b d   h\n")
+        print("       g  i\n")
+        print("            m\n")
         val sampleTreeBst = BinaryTree(BinaryTreeNode("e",
             BinaryTreeNode("c", BinaryTreeNode("b"), BinaryTreeNode("d")),
-            BinaryTreeNode("f", null, BinaryTreeNode("h", BinaryTreeNode("g"), BinaryTreeNode("i")))))
+            BinaryTreeNode("f", null, BinaryTreeNode("h", BinaryTreeNode("g"), BinaryTreeNode("i", null, BinaryTreeNode("m"))))))
         print("\nPretty print a BST:\n")
         sampleTreeBst.prettyPrint()
         print("Is sample tree a BST: " + sampleTree.checkIfBst() + ", second sample tree is BST: " + sampleTreeBst.checkIfBst())
@@ -198,11 +301,34 @@ object TreeProblems {
 
         val lca = sampleTree.lowestCommonAncestor("g", "d")
         print("\nFind LCA between node g and node d in sample tree 1: " + lca)
+
+        val allPaths = sampleTree.rootToLeafForAllPaths()
+        print("\nFind all paths from root to leaf in sample tree 1:\n")
+        allPaths.print()
+
+        val depth = sampleTree.findMaxDepthOfTree()
+        print("\nFind max depth in sample tree 1: " + depth)
+        val depthBst = sampleTreeBst.findMaxDepthOfTree()
+        print("\nFind max depth in sample tree 2 (BST): " + depthBst)
+
+        val minPath = sampleTree.findMinPathBetweenNodes("g", "d")
+        print("\nFind min path from node g to node d in sample tree 1: ")
+        minPath.print()
     }
 
     fun List<TreeProblems.BinaryTreeNode>.print() {
         this.forEach {
             print(it.value + ", ")
+        }
+    }
+
+    fun HashSet<List<TreeProblems.BinaryTreeNode>>.print() {
+        var idx = 1
+        this.forEach {
+            print("path no. $idx: ")
+            it.print()
+            print("\n")
+            idx++
         }
     }
 }
