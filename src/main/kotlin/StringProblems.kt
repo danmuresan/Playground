@@ -54,8 +54,51 @@ object StringProblems {
     // characters, and that you are given the "true" length of the string. (Note: if implementing
     // in Java, please use a character array so that you can perform this operation
     // in place.)
-    fun String.replace(charToReplace: Char, subStr: String): String {
-        return ""
+    fun String.replace(charToReplace: Char, subStringToReplaceWith: String): String {
+        // utility method for finding required length in the char array (to adjust for the padding)
+        fun String.findRequiredLength(char: Char, substring: String): Int {
+            var countOfCharsToReplace = 0
+            this.forEach {
+                if (it == char) {
+                    countOfCharsToReplace++
+                }
+            }
+
+            val extraCountNeeded = countOfCharsToReplace * substring.length
+            return this.length + (extraCountNeeded - countOfCharsToReplace)
+        }
+
+        // prepare padded char array for the input string, accounting in necessary length
+        val lengthNeededForReplacing = findRequiredLength(charToReplace, subStringToReplaceWith)
+        val inputStrArr = CharArray(lengthNeededForReplacing)
+        var currentIndex = 0
+        this.forEach {
+            inputStrArr[currentIndex] = it
+            currentIndex++
+        }
+
+        // ex: "Ana are mere multe______" => "Ana%20are%20mere%20multe"
+        currentIndex = 0
+        val offset = subStringToReplaceWith.length - 1
+        // loop through the char array from end to start
+        for (currentIndex in inputStrArr.size - 1 downTo 0) {
+            // if we found a target char (to be replaced by our substring)
+            if (inputStrArr[currentIndex] == charToReplace) {
+                // shift array chars starting from after the current target char
+                // by an offset equal to the length of the substring we're using as replacement minus one
+                for (i in inputStrArr.size - offset - 1 downTo currentIndex + 1) {
+                    inputStrArr[i + offset] = inputStrArr[i]
+                }
+
+                // replace the target char with the target string now that we made space
+                for (i in 0..offset) {
+                    inputStrArr[currentIndex + i] = subStringToReplaceWith[i]
+                }
+            }
+        }
+
+        // convert char array back to string
+        return String(inputStrArr)
     }
 
     // Implement a method to perform basic string compression using the counts
@@ -145,5 +188,12 @@ object StringProblems {
         print(", returns " + "[(])".checkIfBalanced() + "\n")
         print("String: ([({})]}]) => should return false")
         print(", returns " + "([({})]}])".checkIfBalanced() + "\n")
+
+        print("Problem 7 - Smart char replace with custom string\n")
+        print("**************************************************************\n")
+        print("String: Ana are mere multe, charToReplace: ' ', subString: '%20' => should return Ana%20are%20mere%20multe")
+        print(",\nreturns " + "Ana are mere multe".replace(' ', "%20") + "\n")
+        print("String: Aladabalaportocala, charToReplace: 'a', subString: '####' => should return Al####ad####b####l####portoc####l####")
+        print(",\nreturns " + "Aladabalaportocala".replace('a', "####") + "\n")
     }
 }
