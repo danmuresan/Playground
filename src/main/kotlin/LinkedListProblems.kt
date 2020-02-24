@@ -23,8 +23,24 @@ object LinkedListProblems {
             }
         }
 
+        fun checkIfContainsCycleSuboptimal(): Boolean {
+            var current = head
+            val visitedNodesHashSet = HashSet<String>()
+            while (current.next != null) {
+                if (!visitedNodesHashSet.contains(current.value)) {
+                    visitedNodesHashSet.add(current.value)
+                } else {
+                    return true
+                }
+
+                current = current.next!!
+            }
+
+            return visitedNodesHashSet.contains(current.value)
+        }
+
         fun checkIfContainsCycle(): Boolean {
-            return false // TODO: tortoise and hare
+            return checkIfContainsCycleSuboptimal() // TODO: tortoise and hare
             // unefficient method - go through list and add previously visited nodes to hashset, check if next is in hashset for a cycle
         }
     }
@@ -83,5 +99,11 @@ object LinkedListProblems {
         print("Insert 10 at the end of the list: ")
         inputLinkedList.insertToEnd("10")
         inputLinkedList.print()
+
+        print("\n**************************************************************\n")
+        print("Check if input list contains cycle: " + inputLinkedList.checkIfContainsCycle() + "\n")
+        print("Input list 2: 1 -> 2 -> 3 -> 4 -> 3\n")
+        val inputLinkedList2 = LinkedList(LinkedListNode("1", LinkedListNode("2", LinkedListNode("3", LinkedListNode("4", LinkedListNode("3"))))))
+        print("Check if input list 2 contains cycle: " + inputLinkedList2.checkIfContainsCycle())
     }
 }
