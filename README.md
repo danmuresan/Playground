@@ -1,7 +1,7 @@
-# Kotlin Quick Start
-An empty Kotlin project using Gradle.
+# Kotlin Playground Project
+Kotlin Playground containing some random algorithms
 
-You can [use this template](https://github.com/fwcd/kotlin-quick-start/generate) as a starting point for your own project.
+Can be ran from VSCode (no need for Android Studio)
 
 ## Building
 `./gradlew build`
