@@ -1,5 +1,13 @@
+import java.lang.Exception
+
 object LinkedListProblems {
-    class LinkedList(val head: LinkedListNode) {
+    class LinkedList(private var _head: LinkedListNode) {
+
+        val head: LinkedListNode
+            get() {
+                return _head
+            }
+
         fun insertToEnd(value: String) {
             var current = head
             while (current.next != null) {
@@ -7,6 +15,29 @@ object LinkedListProblems {
             }
 
             current.next = LinkedListNode(value)
+        }
+
+        fun insertAtIndex(value: String, index: Int) {
+            var current = head
+            var remainingCount = index - 1
+            while (current.next != null && remainingCount > 0) {
+                current = current.next!!
+                remainingCount--
+            }
+
+            if (remainingCount > 0) {
+                throw Exception("Index out of bounds")
+            }
+
+            val temp = current.next
+            current.next = LinkedListNode(value)
+            current.next!!.next = temp
+        }
+
+        fun insertAtStart(value: String) {
+            val newNode = LinkedListNode(value)
+            newNode.next = head
+            _head = newNode
         }
 
         fun removeBasedOnValue(value: String) {
@@ -23,7 +54,7 @@ object LinkedListProblems {
             }
         }
 
-        fun checkIfContainsCycleSuboptimal(): Boolean {
+        fun checkIfContainsDuplicateNode(): Boolean {
             var current = head
             val visitedNodesHashSet = HashSet<String>()
             while (current.next != null) {
@@ -39,9 +70,21 @@ object LinkedListProblems {
             return visitedNodesHashSet.contains(current.value)
         }
 
-        fun checkIfContainsCycle(): Boolean {
-            return checkIfContainsCycleSuboptimal() // TODO: tortoise and hare
-            // unefficient method - go through list and add previously visited nodes to hashset, check if next is in hashset for a cycle
+        fun checkIfContainsCycleOptimal(): Boolean {
+            // Tortoise & Hare (Floyd alg)
+            // increment one pointer by 1 (tortoise), the other by 2 (hare)
+            var tortoise = head
+            var hare = head as LinkedListNode?
+
+            while (hare != null && hare.next != null) {
+                tortoise = tortoise.next!!
+                hare = hare.next!!.next
+                if (tortoise == hare) {
+                    return true
+                }
+            }
+
+            return false
         }
     }
 
@@ -101,9 +144,27 @@ object LinkedListProblems {
         inputLinkedList.print()
 
         print("\n**************************************************************\n")
-        print("Check if input list contains cycle: " + inputLinkedList.checkIfContainsCycle() + "\n")
+        print("Insert 8 at the index 3 in the list: ")
+        inputLinkedList.insertAtIndex("8", 3)
+        inputLinkedList.print()
+
+        print("\n**************************************************************\n")
+        print("Insert 15 at start: ")
+        inputLinkedList.insertAtStart("15")
+        inputLinkedList.print()
+
+        print("\n**************************************************************\n")
+        print("Check if input list contains duplicate value: " + inputLinkedList.checkIfContainsDuplicateNode() + "\n")
         print("Input list 2: 1 -> 2 -> 3 -> 4 -> 3\n")
         val inputLinkedList2 = LinkedList(LinkedListNode("1", LinkedListNode("2", LinkedListNode("3", LinkedListNode("4", LinkedListNode("3"))))))
-        print("Check if input list 2 contains cycle: " + inputLinkedList2.checkIfContainsCycle())
+        print("Check if input list 2 contains duplicate value: " + inputLinkedList2.checkIfContainsDuplicateNode())
+
+        print("\n**************************************************************\n")
+        print("Check if input list contains cycle value: " + inputLinkedList.checkIfContainsCycleOptimal() + "\n")
+        print("Input list 2: 1 -> 2 -> 3 -> 4 -> 5 -> back to 3\n")
+        val cycleStartNode = LinkedListNode("3")
+        cycleStartNode.next = LinkedListNode("4", LinkedListNode("5", cycleStartNode))
+        val inputLinkedList3 = LinkedList(LinkedListNode("1", LinkedListNode("2", cycleStartNode)))
+        print("Check if input list 2 contains cycle value: " + inputLinkedList3.checkIfContainsCycleOptimal())
     }
 }
